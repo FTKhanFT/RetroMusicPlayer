@@ -16,19 +16,21 @@ package code.name.monkey.retromusic.mvp.presenter
 
 import code.name.monkey.retromusic.Result
 import code.name.monkey.retromusic.model.Playlist
-import code.name.monkey.retromusic.mvp.*
+import code.name.monkey.retromusic.mvp.BaseView
+import code.name.monkey.retromusic.mvp.Presenter
+import code.name.monkey.retromusic.mvp.PresenterImpl
 import code.name.monkey.retromusic.providers.interfaces.Repository
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
-
 
 /**
  * Created by hemanths on 19/08/17.
  */
 
 interface PlaylistView : BaseView {
-    fun playlists(playlists: ArrayList<Playlist>)
+
+    fun playlists(playlists: List<Playlist>)
 }
 
 interface PlaylistsPresenter : Presenter<PlaylistView> {
@@ -36,7 +38,7 @@ interface PlaylistsPresenter : Presenter<PlaylistView> {
     fun playlists()
 
     class PlaylistsPresenterImpl @Inject constructor(
-            private val repository: Repository
+        private val repository: Repository
     ) : PresenterImpl<PlaylistView>(), PlaylistsPresenter, CoroutineScope {
 
         private val job = Job()
@@ -52,9 +54,7 @@ interface PlaylistsPresenter : Presenter<PlaylistView> {
         override fun playlists() {
             launch {
                 when (val result = repository.allPlaylists()) {
-                    is Result.Success -> withContext(Dispatchers.Main) {
-                        view?.playlists(result.data)
-                    }
+                    is Result.Success -> withContext(Dispatchers.Main) { view?.playlists(result.data) }
                     is Result.Error -> withContext(Dispatchers.Main) { view?.showEmptyView() }
                 }
             }

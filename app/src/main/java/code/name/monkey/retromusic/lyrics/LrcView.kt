@@ -37,6 +37,7 @@ import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
+import code.name.monkey.retromusic.BuildConfig
 import code.name.monkey.retromusic.R
 import java.util.*
 
@@ -47,7 +48,11 @@ import java.util.*
  * Blog : http://www.jianshu.com/u/e76853f863a9
  * Email : freedompaladin@gmail.com
  */
-class LrcView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
+class LrcView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr) {
     private var mLrcData: MutableList<Lrc>? = null
     private var mTextPaint: TextPaint? = null
     private var mDefaultContent: String? = null
@@ -67,8 +72,10 @@ class LrcView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     private var mCurrentPlayLineColor: Int = 0
     private var mNoLrcTextSize: Float = 0.toFloat()
     private var mNoLrcTextColor: Int = 0
+
     //是否拖拽中，否的话响应onClick事件
     private var isDragging: Boolean = false
+
     //用户开始操作
     private var isUserScroll: Boolean = false
     private var isAutoAdjustPosition = true
@@ -142,25 +149,55 @@ class LrcView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     private fun init(context: Context, attrs: AttributeSet?) {
 
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.LrcView)
-        mLrcTextSize = typedArray.getDimension(R.styleable.LrcView_lrcTextSize, sp2px(context, 15f).toFloat())
-        mLrcLineSpaceHeight = typedArray.getDimension(R.styleable.LrcView_lrcLineSpaceSize, dp2px(context, 20f).toFloat())
+        mLrcTextSize =
+            typedArray.getDimension(R.styleable.LrcView_lrcTextSize, sp2px(context, 15f).toFloat())
+        mLrcLineSpaceHeight = typedArray.getDimension(
+            R.styleable.LrcView_lrcLineSpaceSize,
+            dp2px(context, 20f).toFloat()
+        )
         mTouchDelay = typedArray.getInt(R.styleable.LrcView_lrcTouchDelay, 3500)
         mIndicatorTouchDelay = typedArray.getInt(R.styleable.LrcView_indicatorTouchDelay, 2500)
         mNormalColor = typedArray.getColor(R.styleable.LrcView_lrcNormalTextColor, Color.GRAY)
-        mCurrentPlayLineColor = typedArray.getColor(R.styleable.LrcView_lrcCurrentTextColor, Color.BLUE)
-        mNoLrcTextSize = typedArray.getDimension(R.styleable.LrcView_noLrcTextSize, dp2px(context, 20f).toFloat())
+        mCurrentPlayLineColor =
+            typedArray.getColor(R.styleable.LrcView_lrcCurrentTextColor, Color.BLUE)
+        mNoLrcTextSize = typedArray.getDimension(
+            R.styleable.LrcView_noLrcTextSize,
+            dp2px(context, 20f).toFloat()
+        )
         mNoLrcTextColor = typedArray.getColor(R.styleable.LrcView_noLrcTextColor, Color.BLACK)
-        mIndicatorLineWidth = typedArray.getDimension(R.styleable.LrcView_indicatorLineHeight, dp2px(context, 0.5f).toFloat())
-        mIndicatorTextSize = typedArray.getDimension(R.styleable.LrcView_indicatorTextSize, sp2px(context, 13f).toFloat())
-        mIndicatorTextColor = typedArray.getColor(R.styleable.LrcView_indicatorTextColor, Color.GRAY)
-        mCurrentIndicateLineTextColor = typedArray.getColor(R.styleable.LrcView_currentIndicateLrcColor, Color.GRAY)
-        mIndicatorLineColor = typedArray.getColor(R.styleable.LrcView_indicatorLineColor, Color.GRAY)
-        mIndicatorMargin = typedArray.getDimension(R.styleable.LrcView_indicatorStartEndMargin, dp2px(context, 5f).toFloat())
-        mIconLineGap = typedArray.getDimension(R.styleable.LrcView_iconLineGap, dp2px(context, 3f).toFloat())
-        mIconWidth = typedArray.getDimension(R.styleable.LrcView_playIconWidth, dp2px(context, 20f).toFloat())
-        mIconHeight = typedArray.getDimension(R.styleable.LrcView_playIconHeight, dp2px(context, 20f).toFloat())
+        mIndicatorLineWidth = typedArray.getDimension(
+            R.styleable.LrcView_indicatorLineHeight,
+            dp2px(context, 0.5f).toFloat()
+        )
+        mIndicatorTextSize = typedArray.getDimension(
+            R.styleable.LrcView_indicatorTextSize,
+            sp2px(context, 13f).toFloat()
+        )
+        mIndicatorTextColor =
+            typedArray.getColor(R.styleable.LrcView_indicatorTextColor, Color.GRAY)
+        mCurrentIndicateLineTextColor =
+            typedArray.getColor(R.styleable.LrcView_currentIndicateLrcColor, Color.GRAY)
+        mIndicatorLineColor =
+            typedArray.getColor(R.styleable.LrcView_indicatorLineColor, Color.GRAY)
+        mIndicatorMargin = typedArray.getDimension(
+            R.styleable.LrcView_indicatorStartEndMargin,
+            dp2px(context, 5f).toFloat()
+        )
+        mIconLineGap =
+            typedArray.getDimension(R.styleable.LrcView_iconLineGap, dp2px(context, 3f).toFloat())
+        mIconWidth = typedArray.getDimension(
+            R.styleable.LrcView_playIconWidth,
+            dp2px(context, 20f).toFloat()
+        )
+        mIconHeight = typedArray.getDimension(
+            R.styleable.LrcView_playIconHeight,
+            dp2px(context, 20f).toFloat()
+        )
         mPlayDrawable = typedArray.getDrawable(R.styleable.LrcView_playIcon)
-        mPlayDrawable = if (mPlayDrawable == null) ContextCompat.getDrawable(context, R.drawable.ic_play_arrow_white_24dp) else mPlayDrawable
+        mPlayDrawable = if (mPlayDrawable == null) ContextCompat.getDrawable(
+            context,
+            R.drawable.ic_play_arrow_white_24dp
+        ) else mPlayDrawable
         typedArray.recycle()
 
         setupConfigs(context)
@@ -179,7 +216,9 @@ class LrcView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
             isAntiAlias = true
             textAlign = Paint.Align.LEFT
             textSize = mLrcTextSize
-            typeface = ResourcesCompat.getFont(context, R.font.circular)
+           /* if (BuildConfig.FLAVOR != "nofont") {
+                typeface = ResourcesCompat.getFont(context, R.font.circular)
+            }*/
         }
         mDefaultContent = DEFAULT_CONTENT
 
@@ -238,12 +277,20 @@ class LrcView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
             val time = mLrcData!![indicatePosition].time
             val timeWidth = mIndicatorPaint!!.measureText(LrcHelper.formatTime(time))
             mIndicatorPaint!!.color = mIndicatorLineColor
-            canvas.drawLine(mPlayRect!!.right + mIconLineGap, (height / 2).toFloat(),
-                    width - timeWidth * 1.3f, (height / 2).toFloat(), mIndicatorPaint!!)
+            canvas.drawLine(
+                mPlayRect!!.right + mIconLineGap, (height / 2).toFloat(),
+                width - timeWidth * 1.3f, (height / 2).toFloat(), mIndicatorPaint!!
+            )
             val baseX = (width - timeWidth * 1.1f).toInt()
-            val baseline = (height / 2).toFloat() - (mIndicatorPaint!!.descent() - mIndicatorPaint!!.ascent()) / 2 - mIndicatorPaint!!.ascent()
+            val baseline =
+                (height / 2).toFloat() - (mIndicatorPaint!!.descent() - mIndicatorPaint!!.ascent()) / 2 - mIndicatorPaint!!.ascent()
             mIndicatorPaint!!.color = mIndicatorTextColor
-            canvas.drawText(LrcHelper.formatTime(time), baseX.toFloat(), baseline, mIndicatorPaint!!)
+            canvas.drawText(
+                LrcHelper.formatTime(time),
+                baseX.toFloat(),
+                baseline,
+                mIndicatorPaint!!
+            )
         }
     }
 
@@ -257,7 +304,15 @@ class LrcView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         var staticLayout: StaticLayout? = mLrcMap[text]
         if (staticLayout == null) {
             mTextPaint!!.textSize = mLrcTextSize
-            staticLayout = StaticLayout(text, mTextPaint, lrcWidth, Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false)
+            staticLayout = StaticLayout(
+                text,
+                mTextPaint,
+                lrcWidth,
+                Layout.Alignment.ALIGN_NORMAL,
+                1f,
+                0f,
+                false
+            )
             mLrcMap[text] = staticLayout
         }
         canvas.save()
@@ -272,8 +327,10 @@ class LrcView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         mTextPaint!!.color = mNoLrcTextColor
         mTextPaint!!.textSize = mNoLrcTextSize
         canvas.save()
-        val staticLayout = StaticLayout(mDefaultContent, mTextPaint,
-                lrcWidth, Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false)
+        val staticLayout = StaticLayout(
+            mDefaultContent, mTextPaint,
+            lrcWidth, Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false
+        )
         val margin = dip2px(context, 16f).toFloat();
         canvas.translate(margin, margin)
         staticLayout.draw(canvas)
@@ -335,8 +392,10 @@ class LrcView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         var staticLayout: StaticLayout? = mStaticLayoutHashMap[text]
         if (staticLayout == null) {
             mTextPaint!!.textSize = mLrcTextSize
-            staticLayout = StaticLayout(text, mTextPaint,
-                    lrcWidth, Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false)
+            staticLayout = StaticLayout(
+                text, mTextPaint,
+                lrcWidth, Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false
+            )
             mStaticLayoutHashMap[text] = staticLayout
         }
         return staticLayout.height.toFloat()
@@ -405,20 +464,30 @@ class LrcView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 
     private fun handleActionUp(event: MotionEvent) {
         if (isEnableShowIndicator) {
-            ViewCompat.postOnAnimationDelayed(this@LrcView, mHideIndicatorRunnable, mIndicatorTouchDelay.toLong())
+            ViewCompat.postOnAnimationDelayed(
+                this@LrcView,
+                mHideIndicatorRunnable,
+                mIndicatorTouchDelay.toLong()
+            )
         }
         if (isShowTimeIndicator && mPlayRect != null && onClickPlayButton(event)) {
             isShowTimeIndicator = false
             invalidateView()
             if (mOnPlayIndicatorLineListener != null) {
-                mOnPlayIndicatorLineListener!!.onPlay(mLrcData!![indicatePosition].time,
-                        mLrcData!![indicatePosition].text)
+                mOnPlayIndicatorLineListener!!.onPlay(
+                    mLrcData!![indicatePosition].time,
+                    mLrcData!![indicatePosition].text
+                )
             }
         }
         if (overScrolled() && mOffset < 0) {
             scrollToPosition(0)
             if (isAutoAdjustPosition) {
-                ViewCompat.postOnAnimationDelayed(this@LrcView, mScrollRunnable, mTouchDelay.toLong())
+                ViewCompat.postOnAnimationDelayed(
+                    this@LrcView,
+                    mScrollRunnable,
+                    mTouchDelay.toLong()
+                )
             }
             return
         }
@@ -426,7 +495,11 @@ class LrcView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         if (overScrolled() && mOffset > getItemOffsetY(lrcCount - 1)) {
             scrollToPosition(lrcCount - 1)
             if (isAutoAdjustPosition) {
-                ViewCompat.postOnAnimationDelayed(this@LrcView, mScrollRunnable, mTouchDelay.toLong())
+                ViewCompat.postOnAnimationDelayed(
+                    this@LrcView,
+                    mScrollRunnable,
+                    mTouchDelay.toLong()
+                )
             }
             return
         }
@@ -435,9 +508,11 @@ class LrcView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         val YVelocity = mVelocityTracker!!.yVelocity
         val absYVelocity = Math.abs(YVelocity)
         if (absYVelocity > mMinimumFlingVelocity) {
-            mOverScroller!!.fling(0, mOffset.toInt(), 0, (-YVelocity).toInt(), 0,
-                    0, 0, getItemOffsetY(lrcCount - 1).toInt(),
-                    0, getTextHeight(0).toInt())
+            mOverScroller!!.fling(
+                0, mOffset.toInt(), 0, (-YVelocity).toInt(), 0,
+                0, 0, getItemOffsetY(lrcCount - 1).toInt(),
+                0, getTextHeight(0).toInt()
+            )
             invalidateView()
         }
         releaseVelocityTracker()
@@ -493,13 +568,17 @@ class LrcView @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
     }
 
     fun dp2px(context: Context, dpVal: Float): Int {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                dpVal, context.resources.displayMetrics).toInt()
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            dpVal, context.resources.displayMetrics
+        ).toInt()
     }
 
     fun sp2px(context: Context, spVal: Float): Int {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
-                spVal, context.resources.displayMetrics).toInt()
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_SP,
+            spVal, context.resources.displayMetrics
+        ).toInt()
     }
 
     /**

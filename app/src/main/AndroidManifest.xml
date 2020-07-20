@@ -3,27 +3,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="code.name.monkey.retromusic">
 
+    <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
-    <uses-permission android:name="android.permission.WRITE_SETTINGS"
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission
+        android:name="android.permission.WRITE_SETTINGS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="com.android.vending.BILLING" />
 
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.RetroMusic.Light"
+        android:configChanges="locale|layoutDirection"
+        android:theme="@style/Theme.RetroMusic.FollowSystem"
         android:usesCleartextTraffic="false"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning"
         tools:targetApi="m">
@@ -117,7 +121,8 @@
         <activity android:name=".activities.PurchaseActivity" />
         <activity android:name=".activities.WhatsNewActivity" />
         <activity android:name=".activities.bugreport.BugReportActivity" />
-
+        <activity android:name=".activities.ShareInstagramStory" />
+        <activity android:name=".activities.DriveModeActivity" />
         <activity
             android:name=".activities.SearchActivity"
             android:windowSoftInputMode="stateVisible" />

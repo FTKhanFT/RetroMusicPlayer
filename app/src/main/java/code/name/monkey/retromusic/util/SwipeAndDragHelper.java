@@ -17,8 +17,8 @@ package code.name.monkey.retromusic.util;
 import android.graphics.Canvas;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class SwipeAndDragHelper extends ItemTouchHelper.Callback {
 
@@ -36,7 +36,7 @@ public class SwipeAndDragHelper extends ItemTouchHelper.Callback {
 
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-        contract.onViewMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+        contract.onViewMoved(viewHolder.getLayoutPosition(), target.getLayoutPosition());
         return true;
     }
 

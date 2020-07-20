@@ -3,16 +3,43 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <code.name.monkey.appthemehelper.common.prefs.supportv7.ATEPreferenceCategory
         android:layout="@layout/preference_category_title"
-        android:title="Advanced">
+        android:title="@string/pref_header_blacklist">
+
+        <code.name.monkey.retromusic.preferences.BlacklistPreference
+            android:key="blacklist"
+            android:layout="@layout/list_item_view"
+            android:summary="@string/pref_summary_blacklist"
+            android:title="@string/pref_title_blacklist"
+            app:icon="@drawable/ic_music_note_off_white_24dp" />
+
+    </code.name.monkey.appthemehelper.common.prefs.supportv7.ATEPreferenceCategory>
+    <code.name.monkey.appthemehelper.common.prefs.supportv7.ATEPreferenceCategory
+        android:layout="@layout/preference_category_title"
+        android:title="@string/pref_header_playlists">
+
+        <code.name.monkey.retromusic.preferences.MaterialListPreference
+            android:defaultValue="this_month"
+            android:entries="@array/pref_playlists_last_added_interval_titles"
+            android:entryValues="@array/pref_playlists_last_added_interval_values"
+            android:key="last_added_interval"
+            android:layout="@layout/list_item_view"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_last_added_interval"
+            app:icon="@drawable/ic_playlist_add_white_24dp" />
+
+    </code.name.monkey.appthemehelper.common.prefs.supportv7.ATEPreferenceCategory>
+    <code.name.monkey.appthemehelper.common.prefs.supportv7.ATEPreferenceCategory
+        android:layout="@layout/preference_category_title"
+        android:title="@string/pref_header_advanced">
 
         <code.name.monkey.appthemehelper.common.prefs.supportv7.ATESeekBarPreference
             android:defaultValue="30"
             android:key="filter_song"
             android:layout="@layout/list_item_view_seekbar"
             android:max="60"
-            android:title="@string/pref_filter_song_title"
             android:summary="@string/pref_filter_song_summary"
-            app:enableCopying="true"
+            android:title="@string/pref_filter_song_title"
             app:icon="@drawable/ic_filter_song_white_24dp"
             app:showSeekBarValue="true" />
 
@@ -22,7 +49,6 @@
             android:layout="@layout/list_item_view_switch"
             android:summary="@string/pref_keep_pause_on_zero_volume_summary"
             android:title="@string/pref_keep_pause_on_zero_volume_title"
-            app:enableCopying="true"
             app:icon="@drawable/ic_pause_white_24dp" />
 
         <code.name.monkey.appthemehelper.common.prefs.supportv7.ATESwitchPreference
@@ -31,7 +57,6 @@
             android:layout="@layout/list_item_view_switch"
             android:summary="@string/pref_keep_screen_on_summary"
             android:title="@string/pref_keep_screen_on_title"
-            app:enableCopying="true"
             app:icon="@drawable/ic_settings_brigntness_white_24dp" />
 
         <code.name.monkey.appthemehelper.common.prefs.supportv7.ATESeekBarPreference
@@ -41,9 +66,18 @@
             android:max="50"
             android:summary="@string/pref_dialog_corner_summary"
             android:title="@string/pref_dialog_corner_title"
-            app:enableCopying="true"
             app:icon="@drawable/ic_rounded_corner"
             app:showSeekBarValue="true" />
 
     </code.name.monkey.appthemehelper.common.prefs.supportv7.ATEPreferenceCategory>
+    <code.name.monkey.retromusic.preferences.MaterialListPreference
+        android:defaultValue="auto"
+        android:entries="@array/pref_language_names"
+        android:entryValues="@array/pref_language_codes"
+        android:key="language_name"
+        android:layout="@layout/list_item_view"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_language_name"
+        app:icon="@drawable/ic_language_white_24dp" />
 </androidx.preference.PreferenceScreen>

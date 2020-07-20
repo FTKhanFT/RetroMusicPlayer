@@ -11,18 +11,20 @@ import android.view.*
 import android.view.animation.DecelerateInterpolator
 import code.name.monkey.appthemehelper.ThemeStore
 import code.name.monkey.retromusic.R
+import code.name.monkey.retromusic.extensions.textColorPrimary
+import code.name.monkey.retromusic.extensions.textColorSecondary
 import code.name.monkey.retromusic.fragments.base.AbsMusicServiceFragment
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.helper.MusicProgressViewUpdateHelper
 import code.name.monkey.retromusic.helper.PlayPauseButtonOnClickHandler
-import code.name.monkey.retromusic.util.NavigationUtil
 import code.name.monkey.retromusic.util.PreferenceUtil
 import code.name.monkey.retromusic.util.RetroUtil
 import code.name.monkey.retromusic.util.ViewUtil
 import kotlinx.android.synthetic.main.fragment_mini_player.*
 import kotlin.math.abs
 
-open class MiniPlayerFragment : AbsMusicServiceFragment(), MusicProgressViewUpdateHelper.Callback, View.OnClickListener {
+open class MiniPlayerFragment : AbsMusicServiceFragment(), MusicProgressViewUpdateHelper.Callback,
+    View.OnClickListener {
 
     private lateinit var progressViewUpdateHelper: MusicProgressViewUpdateHelper
 
@@ -31,13 +33,16 @@ open class MiniPlayerFragment : AbsMusicServiceFragment(), MusicProgressViewUpda
         progressViewUpdateHelper = MusicProgressViewUpdateHelper(this)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_mini_player, container, false)
     }
 
     override fun onClick(view: View) {
         when (view.id) {
-            R.id.actionPlayingQueue -> NavigationUtil.goToPlayingQueue(requireActivity())
             R.id.actionNext -> MusicPlayerRemote.playNextSong()
             R.id.actionPrevious -> MusicPlayerRemote.back()
         }
@@ -51,17 +56,18 @@ open class MiniPlayerFragment : AbsMusicServiceFragment(), MusicProgressViewUpda
         if (RetroUtil.isTablet()) {
             actionNext.visibility = View.VISIBLE
             actionPrevious.visibility = View.VISIBLE
-            actionPlayingQueue.visibility = View.VISIBLE
+            actionNext?.visibility = View.VISIBLE
+            actionPrevious?.visibility = View.VISIBLE
         } else {
-            actionNext.visibility = if (PreferenceUtil.getInstance(requireContext()).isExtraControls) View.VISIBLE else View.GONE
-            actionPlayingQueue.visibility = if (PreferenceUtil.getInstance(requireContext()).isExtraControls) View.GONE else View.VISIBLE
-            actionPrevious.visibility = if (PreferenceUtil.getInstance(requireContext()).isExtraControls) View.VISIBLE else View.GONE
+            actionNext.visibility =
+                if (PreferenceUtil.getInstance(requireContext()).isExtraControls) View.VISIBLE else View.GONE
+            actionPrevious.visibility =
+                if (PreferenceUtil.getInstance(requireContext()).isExtraControls) View.VISIBLE else View.GONE
         }
-
-        actionPlayingQueue.setOnClickListener(this)
         actionNext.setOnClickListener(this)
         actionPrevious.setOnClickListener(this)
-
+        actionNext?.setOnClickListener(this)
+        actionPrevious?.setOnClickListener(this)
     }
 
     private fun setUpMiniPlayer() {
@@ -78,10 +84,10 @@ open class MiniPlayerFragment : AbsMusicServiceFragment(), MusicProgressViewUpda
 
         val song = MusicPlayerRemote.currentSong
         val title = SpannableString(song.title)
-        title.setSpan(ForegroundColorSpan(ThemeStore.textColorPrimary(requireContext())), 0, title.length, 0)
+        title.setSpan(ForegroundColorSpan(textColorPrimary(requireContext())), 0, title.length, 0)
 
         val text = SpannableString(song.artistName)
-        text.setSpan(ForegroundColorSpan(ThemeStore.textColorSecondary(requireContext())), 0, text.length, 0)
+        text.setSpan(ForegroundColorSpan(textColorSecondary(requireContext())), 0, text.length, 0)
 
         builder.append(title).append(" • ").append(text)
 
@@ -101,7 +107,6 @@ open class MiniPlayerFragment : AbsMusicServiceFragment(), MusicProgressViewUpda
     override fun onPlayStateChanged() {
         updatePlayPauseDrawableState()
     }
-
 
     override fun onUpdateProgressViews(progress: Int, total: Int) {
         progressBar.max = total
@@ -135,21 +140,23 @@ open class MiniPlayerFragment : AbsMusicServiceFragment(), MusicProgressViewUpda
 
         init {
             flingPlayBackController = GestureDetector(context,
-                    object : GestureDetector.SimpleOnGestureListener() {
-                        override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float,
-                                             velocityY: Float): Boolean {
-                            if (abs(velocityX) > abs(velocityY)) {
-                                if (velocityX < 0) {
-                                    MusicPlayerRemote.playNextSong()
-                                    return true
-                                } else if (velocityX > 0) {
-                                    MusicPlayerRemote.playPreviousSong()
-                                    return true
-                                }
+                object : GestureDetector.SimpleOnGestureListener() {
+                    override fun onFling(
+                        e1: MotionEvent, e2: MotionEvent, velocityX: Float,
+                        velocityY: Float
+                    ): Boolean {
+                        if (abs(velocityX) > abs(velocityY)) {
+                            if (velocityX < 0) {
+                                MusicPlayerRemote.playNextSong()
+                                return true
+                            } else if (velocityX > 0) {
+                                MusicPlayerRemote.playPreviousSong()
+                                return true
                             }
-                            return false
                         }
-                    })
+                        return false
+                    }
+                })
         }
 
         @SuppressLint("ClickableViewAccessibility")

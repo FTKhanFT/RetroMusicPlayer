@@ -3,186 +3,187 @@ package code.name.monkey.retromusic.activities
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.recyclerview.widget.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import code.name.monkey.appthemehelper.ThemeStore
-import code.name.monkey.appthemehelper.util.*
+import code.name.monkey.appthemehelper.util.ATHUtil
+import code.name.monkey.appthemehelper.util.ColorUtil
+import code.name.monkey.appthemehelper.util.MaterialValueHelper
 import code.name.monkey.retromusic.R
 import code.name.monkey.retromusic.activities.base.AbsMusicServiceActivity
 import code.name.monkey.retromusic.adapter.song.PlayingQueueAdapter
-import code.name.monkey.retromusic.extensions.applyToolbar
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
-import code.name.monkey.retromusic.util.*
-import code.name.monkey.retromusic.util.ViewUtil
-import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator
+import code.name.monkey.retromusic.util.MusicUtil
+import com.h6ah4i.android.widget.advrecyclerview.animator.DraggableItemAnimator
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager
+import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils
 import kotlinx.android.synthetic.main.activity_playing_queue.*
 
 open class PlayingQueueActivity : AbsMusicServiceActivity() {
 
-	private var wrappedAdapter: RecyclerView.Adapter<*>? = null
-	private var recyclerViewDragDropManager: RecyclerViewDragDropManager? = null
-	private var playingQueueAdapter: PlayingQueueAdapter? = null
-	private lateinit var linearLayoutManager: LinearLayoutManager
+    private var wrappedAdapter: RecyclerView.Adapter<*>? = null
+    private var recyclerViewDragDropManager: RecyclerViewDragDropManager? = null
+    private var recyclerViewSwipeManager: RecyclerViewSwipeManager? = null
+    private var recyclerViewTouchActionGuardManager: RecyclerViewTouchActionGuardManager? = null
+    private var playingQueueAdapter: PlayingQueueAdapter? = null
+    private lateinit var linearLayoutManager: LinearLayoutManager
 
-	private fun getUpNextAndQueueTime(): String {
-		val duration = MusicPlayerRemote.getQueueDurationMillis(MusicPlayerRemote.position)
+    private fun getUpNextAndQueueTime(): String {
+        val duration = MusicPlayerRemote.getQueueDurationMillis(MusicPlayerRemote.position)
+        return MusicUtil.buildInfoString(
+            resources.getString(R.string.up_next),
+            MusicUtil.getReadableDurationString(duration)
+        )
+    }
 
-		return MusicUtil.buildInfoString(
-				resources.getString(R.string.up_next), MusicUtil.getReadableDurationString(duration)
-		)
-	}
+    override fun onCreate(savedInstanceState: Bundle?) {
+        setDrawUnderStatusBar()
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_playing_queue)
+        setStatusbarColorAuto()
+        setNavigationbarColorAuto()
+        setTaskDescriptionColorAuto()
+        setLightNavigationBar(true)
 
-	override fun onCreate(
-			savedInstanceState: Bundle?
-	) {
-		super.onCreate(savedInstanceState)
-		setContentView(R.layout.activity_playing_queue)
+        setupToolbar()
+        setUpRecyclerView()
 
-		setStatusbarColorAuto()
-		setNavigationBarColorPrimary()
-		setTaskDescriptionColorAuto()
-		setLightNavigationBar(true)
+        clearQueue.setOnClickListener {
+            MusicPlayerRemote.clearQueue()
+        }
+        checkForPadding()
+    }
 
-		setupToolbar()
-		setUpRecyclerView()
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
-		clearQueue.setOnClickListener {
-			MusicPlayerRemote.clearQueue()
-		}
-		checkForPadding()
-	}
+    private fun setUpRecyclerView() {
+        recyclerViewTouchActionGuardManager = RecyclerViewTouchActionGuardManager()
+        recyclerViewDragDropManager = RecyclerViewDragDropManager()
+        recyclerViewSwipeManager = RecyclerViewSwipeManager()
 
-	override fun onOptionsItemSelected(item: MenuItem): Boolean {
-		return when (item.itemId) {
-			android.R.id.home -> {
-				onBackPressed()
-				true
-			}
-			else              -> super.onOptionsItemSelected(item)
-		}
-	}
+        val animator = DraggableItemAnimator()
+        animator.supportsChangeAnimations = false
 
-	private fun setUpRecyclerView() {
-		recyclerViewDragDropManager = RecyclerViewDragDropManager()
-		val animator = RefactoredDefaultItemAnimator()
+        playingQueueAdapter = PlayingQueueAdapter(
+            this,
+            MusicPlayerRemote.playingQueue,
+            MusicPlayerRemote.position,
+            R.layout.item_queue
+        )
+        wrappedAdapter = recyclerViewDragDropManager?.createWrappedAdapter(playingQueueAdapter!!)
+        wrappedAdapter = wrappedAdapter?.let { recyclerViewSwipeManager?.createWrappedAdapter(it) }
 
-		playingQueueAdapter = PlayingQueueAdapter(
-				this,
-				MusicPlayerRemote.playingQueue,
-				MusicPlayerRemote.position,
-				R.layout.item_queue
-		)
-		wrappedAdapter = recyclerViewDragDropManager?.createWrappedAdapter(playingQueueAdapter!!)
+        linearLayoutManager = LinearLayoutManager(this)
 
-		linearLayoutManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = linearLayoutManager
+        recyclerView.adapter = wrappedAdapter
+        recyclerView.itemAnimator = animator
+        recyclerViewTouchActionGuardManager?.attachRecyclerView(recyclerView)
+        recyclerViewDragDropManager?.attachRecyclerView(recyclerView)
+        recyclerViewSwipeManager?.attachRecyclerView(recyclerView)
+        linearLayoutManager.scrollToPositionWithOffset(MusicPlayerRemote.position + 1, 0)
 
-		recyclerView.apply {
-			layoutManager = linearLayoutManager
-			adapter = wrappedAdapter
-			itemAnimator = animator
-			recyclerViewDragDropManager?.attachRecyclerView(this)
-		}
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (dy > 0) {
+                    clearQueue.shrink()
+                } else if (dy < 0) {
+                    clearQueue.extend()
+                }
+            }
+        })
+        //ViewUtil.setUpFastScrollRecyclerViewColor(this, recyclerView)
+    }
 
-		linearLayoutManager.scrollToPositionWithOffset(MusicPlayerRemote.position + 1, 0)
+    private fun checkForPadding() {
+    }
 
-		recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-			override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-				super.onScrolled(recyclerView, dx, dy)
-				if (dy > 0) {
-					clearQueue.shrink()
-				} else if (dy < 0) {
-					clearQueue.extend()
-				}
-			}
-		})
-		ViewUtil.setUpFastScrollRecyclerViewColor(this, recyclerView)
-	}
+    override fun onQueueChanged() {
+        if (MusicPlayerRemote.playingQueue.isEmpty()) {
+            finish()
+            return
+        }
+        checkForPadding()
+        updateQueue()
+        updateCurrentSong()
+    }
 
-	private fun checkForPadding() {
+    override fun onMediaStoreChanged() {
+        updateQueue()
+        updateCurrentSong()
+    }
 
-	}
+    private fun updateCurrentSong() {
+        toolbar.subtitle = getUpNextAndQueueTime()
+    }
 
-	override fun onQueueChanged() {
-		if (MusicPlayerRemote.playingQueue.isEmpty()) {
-			finish()
-			return
-		}
-		checkForPadding()
-		updateQueue()
-		updateCurrentSong()
-	}
+    override fun onPlayingMetaChanged() {
+        updateQueuePosition()
+    }
 
-	override fun onMediaStoreChanged() {
-		updateQueue()
-		updateCurrentSong()
-	}
+    private fun updateQueuePosition() {
+        playingQueueAdapter?.setCurrent(MusicPlayerRemote.position)
+        resetToCurrentPosition()
+        toolbar.subtitle = getUpNextAndQueueTime()
+    }
 
-	private fun updateCurrentSong() {
-		playerQueueSubHeader.text = getUpNextAndQueueTime()
-	}
+    private fun updateQueue() {
+        playingQueueAdapter?.swapDataSet(MusicPlayerRemote.playingQueue, MusicPlayerRemote.position)
+        resetToCurrentPosition()
+    }
 
-	override fun onPlayingMetaChanged() {
-		updateQueuePosition()
-	}
+    private fun resetToCurrentPosition() {
+        recyclerView.stopScroll()
+        linearLayoutManager.scrollToPositionWithOffset(MusicPlayerRemote.position + 1, 0)
+    }
 
-	private fun updateQueuePosition() {
-		playingQueueAdapter?.setCurrent(MusicPlayerRemote.position)
-		resetToCurrentPosition()
-		playerQueueSubHeader.text = getUpNextAndQueueTime()
-	}
+    override fun onPause() {
+        if (recyclerViewDragDropManager != null) {
+            recyclerViewDragDropManager!!.cancelDrag()
+        }
+        super.onPause()
+    }
 
-	private fun updateQueue() {
-		playingQueueAdapter?.swapDataSet(MusicPlayerRemote.playingQueue, MusicPlayerRemote.position)
-		resetToCurrentPosition()
-	}
+    override fun onDestroy() {
+        if (recyclerViewDragDropManager != null) {
+            recyclerViewDragDropManager!!.release()
+            recyclerViewDragDropManager = null
+        }
+        if (recyclerViewSwipeManager != null) {
+            recyclerViewSwipeManager?.release()
+            recyclerViewSwipeManager = null
+        }
+        if (wrappedAdapter != null) {
+            WrapperAdapterUtils.releaseAll(wrappedAdapter)
+            wrappedAdapter = null
+        }
+        playingQueueAdapter = null
+        super.onDestroy()
+    }
 
-	private fun resetToCurrentPosition() {
-		recyclerView.stopScroll()
-		linearLayoutManager.scrollToPositionWithOffset(MusicPlayerRemote.position + 1, 0)
-	}
+    private fun setupToolbar() {
+        toolbar.subtitle = getUpNextAndQueueTime()
 
-	override fun onPause() {
-		if (recyclerViewDragDropManager != null) {
-			recyclerViewDragDropManager!!.cancelDrag()
-		}
-		super.onPause()
-	}
-
-	override fun onDestroy() {
-		if (recyclerViewDragDropManager != null) {
-			recyclerViewDragDropManager!!.release()
-			recyclerViewDragDropManager = null
-		}
-
-		if (wrappedAdapter != null) {
-			WrapperAdapterUtils.releaseAll(wrappedAdapter)
-			wrappedAdapter = null
-		}
-		playingQueueAdapter = null
-		super.onDestroy()
-	}
-
-	private fun setupToolbar() {
-		playerQueueSubHeader.text = getUpNextAndQueueTime()
-		playerQueueSubHeader.setTextColor(ThemeStore.accentColor(this))
-
-		applyToolbar(toolbar)
-		appBarLayout.setBackgroundColor(ATHUtil.resolveColor(this, R.attr.colorPrimary))
-
-		clearQueue.backgroundTintList = ColorStateList.valueOf(ThemeStore.accentColor(this))
-		ColorStateList.valueOf(
-				MaterialValueHelper.getPrimaryTextColor(
-						this,
-						ColorUtil.isColorLight(
-								ThemeStore.accentColor(
-										this
-								)
-						)
-				)
-		).apply {
-			clearQueue.setTextColor(this)
-			clearQueue.iconTint = this
-		}
-	}
+        toolbar.setBackgroundColor(ATHUtil.resolveColor(this, R.attr.colorSurface))
+        setSupportActionBar(toolbar)
+        val accentColor = ThemeStore.accentColor(this)
+        clearQueue.backgroundTintList = ColorStateList.valueOf(accentColor)
+        ColorStateList.valueOf(
+            MaterialValueHelper.getPrimaryTextColor(this, ColorUtil.isColorLight(accentColor))
+        ).apply {
+            clearQueue.setTextColor(this)
+            clearQueue.iconTint = this
+        }
+    }
 }

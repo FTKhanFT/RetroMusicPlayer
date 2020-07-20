@@ -2,9 +2,17 @@
 
     <style name="Theme.RetroMusic" parent="Theme.RetroMusic.Base" />
 
-    <style name="Theme.RetroMusic.Light" parent="Theme.RetroMusic.Base.Light" />
+    <style name="Theme.RetroMusic.Light" parent="Theme.RetroMusic.Base.Light" >
+        <item name="android:windowBackground">@color/window_color_light</item>
+    </style>
 
-    <style name="Theme.RetroMusic.Black" parent="Theme.RetroMusic.Base.Black" />
+    <style name="Theme.RetroMusic.Black" parent="Theme.RetroMusic.Base.Black" >
+        <item name="android:windowBackground">@color/window_color_dark</item>
+    </style>
+
+    <style name="Theme.RetroMusic.FollowSystem" parent="Theme.RetroMusic.Base.Adaptive" >
+        <item name="android:windowBackground">@color/window_color</item>
+    </style>
 
     <style name="Theme.RetroMusic.Notification" parent="@android:style/TextAppearance.StatusBar.EventContent" />
 
@@ -46,6 +54,7 @@
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">20sp</item>
         <item name="android:letterSpacing">0.0125</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="BigTitleTextAppearanceToolbar">
@@ -125,6 +134,10 @@
         <item name="android:fontFamily">@font/circular</item>
     </style>
 
+    <style name="TextViewHeadline2" parent="TextAppearance.MaterialComponents.Headline2">
+        <item name="android:fontFamily">@font/circular</item>
+    </style>
+
     <style name="TextViewSubtitle1" parent="TextAppearance.MaterialComponents.Subtitle1">
         <item name="android:fontFamily">@font/circular</item>
     </style>
@@ -177,4 +190,25 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
+    <style name="CircularShapeAppearance" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">22dp</item>
+    </style>
+
+    <style name="BigCircularShapeAppearance" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">56dp</item>
+    </style>
+
+    <style name="ExtraBigCircularShapeAppearance" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">78dp</item>
+    </style>
+
+    <style name="RetroSliderTooltip" parent="Widget.MaterialComponents.Tooltip">
+        <item name="backgroundColor">@color/md_white_1000</item>
+        <item name="background">@color/md_white_1000</item>
+        <item name="android:background">@color/md_white_1000</item>
+        <item name="android:textColor">@color/md_red_400</item>
+    </style>
 </resources>

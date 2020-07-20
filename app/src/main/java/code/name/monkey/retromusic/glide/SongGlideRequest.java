@@ -41,46 +41,68 @@ import code.name.monkey.retromusic.util.PreferenceUtil;
  */
 public class SongGlideRequest {
 
-    public static final DiskCacheStrategy DEFAULT_DISK_CACHE_STRATEGY = DiskCacheStrategy.NONE;
-    public static final int DEFAULT_ERROR_IMAGE = R.drawable.default_album_art;
-    public static final int DEFAULT_ANIMATION = android.R.anim.fade_in;
+    private static final DiskCacheStrategy DEFAULT_DISK_CACHE_STRATEGY = DiskCacheStrategy.NONE;
+    private static final int DEFAULT_ERROR_IMAGE = R.drawable.default_audio_art;
+    private static final int DEFAULT_ANIMATION = android.R.anim.fade_in;
+
+    @NonNull
+    private static DrawableTypeRequest createBaseRequest(@NonNull RequestManager requestManager,
+                                                         @NonNull Song song,
+                                                         boolean ignoreMediaStore) {
+        if (ignoreMediaStore) {
+            return requestManager.load(new AudioFileCover(song.getData()));
+        } else {
+            return requestManager.loadFromMediaStore(MusicUtil.getMediaStoreAlbumCoverUri(song.getAlbumId()));
+        }
+    }
+
+    @NonNull
+    private static Key createSignature(@NonNull Song song) {
+        return new MediaStoreSignature("", song.getDateModified(), 0);
+    }
 
     public static class Builder {
         final RequestManager requestManager;
         final Song song;
         boolean ignoreMediaStore;
 
-        public static Builder from(@NonNull RequestManager requestManager, Song song) {
-            return new Builder(requestManager, song);
-        }
-
         private Builder(@NonNull RequestManager requestManager, Song song) {
             this.requestManager = requestManager;
             this.song = song;
         }
 
-        public PaletteBuilder generatePalette(Context context) {
+        @NonNull
+        public static Builder from(@NonNull RequestManager requestManager, Song song) {
+            return new Builder(requestManager, song);
+        }
+
+        @NonNull
+        public PaletteBuilder generatePalette(@NonNull Context context) {
             return new PaletteBuilder(this, context);
         }
 
+        @NonNull
         public BitmapBuilder asBitmap() {
             return new BitmapBuilder(this);
         }
 
-        public Builder checkIgnoreMediaStore(Context context) {
+        @NonNull
+        public Builder checkIgnoreMediaStore(@NonNull Context context) {
             return ignoreMediaStore(PreferenceUtil.getInstance(context).ignoreMediaStoreArtwork());
         }
 
+        @NonNull
         public Builder ignoreMediaStore(boolean ignoreMediaStore) {
             this.ignoreMediaStore = ignoreMediaStore;
             return this;
         }
 
+        @NonNull
         public DrawableRequestBuilder<GlideDrawable> build() {
             //noinspection unchecked
             return createBaseRequest(requestManager, song, ignoreMediaStore)
                     .diskCacheStrategy(DEFAULT_DISK_CACHE_STRATEGY)
-                    .error(DEFAULT_ERROR_IMAGE)
+                    .placeholder(DEFAULT_ERROR_IMAGE)
                     .animate(DEFAULT_ANIMATION)
                     .signature(createSignature(song));
         }
@@ -89,7 +111,7 @@ public class SongGlideRequest {
     public static class BitmapBuilder {
         private final Builder builder;
 
-        public BitmapBuilder(Builder builder) {
+        BitmapBuilder(Builder builder) {
             this.builder = builder;
         }
 
@@ -98,7 +120,7 @@ public class SongGlideRequest {
             return createBaseRequest(builder.requestManager, builder.song, builder.ignoreMediaStore)
                     .asBitmap()
                     .diskCacheStrategy(DEFAULT_DISK_CACHE_STRATEGY)
-                    .error(DEFAULT_ERROR_IMAGE)
+                    .placeholder(DEFAULT_ERROR_IMAGE)
                     .animate(DEFAULT_ANIMATION)
                     .signature(createSignature(builder.song));
         }
@@ -108,7 +130,7 @@ public class SongGlideRequest {
         final Context context;
         private final Builder builder;
 
-        public PaletteBuilder(Builder builder, Context context) {
+        PaletteBuilder(Builder builder, Context context) {
             this.builder = builder;
             this.context = context;
         }
@@ -119,21 +141,9 @@ public class SongGlideRequest {
                     .asBitmap()
                     .transcode(new BitmapPaletteTranscoder(context), BitmapPaletteWrapper.class)
                     .diskCacheStrategy(DEFAULT_DISK_CACHE_STRATEGY)
-                    .error(DEFAULT_ERROR_IMAGE)
+                    .placeholder(DEFAULT_ERROR_IMAGE)
                     .animate(DEFAULT_ANIMATION)
                     .signature(createSignature(builder.song));
         }
-    }
-
-    public static DrawableTypeRequest createBaseRequest(RequestManager requestManager, Song song, boolean ignoreMediaStore) {
-        if (ignoreMediaStore) {
-            return requestManager.load(new AudioFileCover(song.getData()));
-        } else {
-            return requestManager.loadFromMediaStore(MusicUtil.getMediaStoreAlbumCoverUri(song.getAlbumId()));
-        }
-    }
-
-    public static Key createSignature(Song song) {
-        return new MediaStoreSignature("", song.getDateModified(), 0);
     }
 }

@@ -4,18 +4,24 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import code.name.monkey.retromusic.App
 import code.name.monkey.retromusic.R
 import code.name.monkey.retromusic.adapter.playlist.PlaylistAdapter
 import code.name.monkey.retromusic.fragments.base.AbsLibraryPagerRecyclerViewFragment
+import code.name.monkey.retromusic.interfaces.MainActivityFragmentCallbacks
 import code.name.monkey.retromusic.model.Playlist
 import code.name.monkey.retromusic.mvp.presenter.PlaylistView
 import code.name.monkey.retromusic.mvp.presenter.PlaylistsPresenter
 import javax.inject.Inject
 
+class PlaylistsFragment :
+    AbsLibraryPagerRecyclerViewFragment<PlaylistAdapter, GridLayoutManager>(), PlaylistView,
+    MainActivityFragmentCallbacks {
 
-class PlaylistsFragment : AbsLibraryPagerRecyclerViewFragment<PlaylistAdapter, LinearLayoutManager>(), PlaylistView {
+    override fun handleBackPress(): Boolean {
+        return false
+    }
 
     @Inject
     lateinit var playlistsPresenter: PlaylistsPresenter
@@ -33,18 +39,22 @@ class PlaylistsFragment : AbsLibraryPagerRecyclerViewFragment<PlaylistAdapter, L
         playlistsPresenter.attachView(this)
     }
 
-    override fun createLayoutManager(): LinearLayoutManager {
-        return LinearLayoutManager(activity)
+    override fun createLayoutManager(): GridLayoutManager {
+        return GridLayoutManager(requireContext(), 1)
     }
 
     override fun createAdapter(): PlaylistAdapter {
-        return PlaylistAdapter(libraryFragment.mainActivity, ArrayList(),
-                R.layout.item_list, libraryFragment)
+        return PlaylistAdapter(
+            mainActivity,
+            ArrayList(),
+            R.layout.item_list,
+            mainActivity
+        )
     }
 
     override fun onResume() {
         super.onResume()
-        if (adapter!!.dataSet.isEmpty()) {
+        if (adapter!!.dataSet.isNullOrEmpty()) {
             playlistsPresenter.playlists()
         }
     }
@@ -63,7 +73,7 @@ class PlaylistsFragment : AbsLibraryPagerRecyclerViewFragment<PlaylistAdapter, L
         adapter?.swapDataSet(ArrayList())
     }
 
-    override fun playlists(playlists: ArrayList<Playlist>) {
+    override fun playlists(playlists: List<Playlist>) {
         adapter?.swapDataSet(playlists)
     }
 
@@ -79,6 +89,7 @@ class PlaylistsFragment : AbsLibraryPagerRecyclerViewFragment<PlaylistAdapter, L
         @JvmField
         val TAG: String = PlaylistsFragment::class.java.simpleName
 
+        @JvmStatic
         fun newInstance(): PlaylistsFragment {
             val args = Bundle()
             val fragment = PlaylistsFragment()
